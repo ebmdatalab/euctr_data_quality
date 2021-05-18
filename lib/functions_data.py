@@ -112,11 +112,11 @@ nca_name_mapping = {'UK - MHRA': 'UK - MHRA',
 
 #Functions
 
-def earliest_record_check(data, country_abbrev):
-    df = data[['eudract_number', 'eudract_number_with_country', 'date_on_which_this_record_was_first_entered_in_the_eudract_data']]
-    country_data = df[df.eudract_number_with_country.str.contains(country_abbrev)].reset_index(drop=True)
-    country_data['date_on_which_this_record_was_first_entered_in_the_eudract_data'] = pd.to_datetime(country_data['date_on_which_this_record_was_first_entered_in_the_eudract_data'])
-    return country_data.date_on_which_this_record_was_first_entered_in_the_eudract_data.min().date()
+def earliest_record_check(data, nca_name):
+    df = data[['eudract_number', 'nca', 'date_entered']]
+    country_data = df[df.nca == nca_name].reset_index(drop=True)
+    country_data['date_entered'] = pd.to_datetime(country_data['date_entered'])
+    return country_data.date_entered.min().date()
 
 
 def zero_out_dict(a_dict, values):
