@@ -127,29 +127,6 @@ def zero_out_dict(a_dict, values):
             a_dict[y] = 0
     return dict(sorted(a_dict.items()))
 
-def adf_test(timeseries, alpha=.05):
-    dftest = adfuller(timeseries, autolag='AIC')
-    dfoutput = pd.Series(dftest[0:4], index=['Test Statistic','p-value','#Lags Used','Number of Observations Used'])
-    for key,value in dftest[4].items():
-       dfoutput['Critical Value (%s)'%key] = value
-    if dfoutput['p-value'] < alpha:
-        dfoutput['interpretation'] = 'Stationary'
-    else:
-        dfoutput['interpretation'] = 'Not stationary'
-    return dfoutput
-
-def kpss_test(timeseries, alpha=.05):
-    #print ('Results of KPSS Test:')
-    kpsstest = kpss(timeseries, regression='c', nlags="auto")
-    kpss_output = pd.Series(kpsstest[0:3], index=['Test Statistic','p-value','Lags Used'])
-    for key,value in kpsstest[3].items():
-        kpss_output['Critical Value (%s)'%key] = value
-    if kpss_output['p-value'] < alpha:
-        kpss_output['interpretation'] = 'Not stationary'
-    else:
-        kpss_output['interpretation'] = 'Stationary'
-    return kpss_output
-
 def stationary_output(df, nca, ind, print_on=True, diff=False):
     country = df.loc[nca]
     first_reporting_quarter = country[country.eudract_number > 0].index.min()
