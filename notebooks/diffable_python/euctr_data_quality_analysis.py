@@ -163,12 +163,12 @@ earliest_entered['year'] = earliest_entered.date_entered.dt.year
 unique_trials = earliest_entered[['eudract_number', 'year']].groupby('year').count()
 
 # + trusted=true
-fig, ax = plt.subplots(figsize = (12,6), dpi=300)
+fig, ax = plt.subplots(figsize = (12,6), dpi=400)
 
 grouped_overall[(grouped_overall.index > 2004) & (grouped_overall.index < 2020)].plot(ax=ax, legend=False, lw=2, 
                                                                                       marker='.', markersize=12)
 unique_trials[(unique_trials.index > 2004) & (unique_trials.index < 2020)].plot(ax=ax, legend=False, grid=True, 
-                                                                                lw=2, marker='.', markersize=12)
+                                                                                lw=2, marker='^', markersize=10)
 
 ax.legend(['Total CTAs', 'Unique Trials'], bbox_to_anchor = (1, 1))
 ax.set_xticks(range(2005, 2020))
@@ -177,7 +177,7 @@ plt.xlabel('CTA Entry Year', labelpad=10)
 plt.ylabel('Records Entered')
 plt.title('Trend in new CTA and Trial Registration on the EUCTR', pad=10)
 
-#fig.savefig(parent + '/data/Figures/fig1.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_s1.jpg', bbox_inches='tight', dpi=400)
 fig.show()
 # -
 
@@ -200,8 +200,8 @@ grouped_year = reg_df[['eudract_number']].groupby([reg_df.nca, reg_df.entered_ye
 grouped_year_2 = reg_df[['eudract_number']].groupby([reg_df.nca, reg_df.approved_year]).count()
 
 # + trusted=true
-fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=300)
-fig.suptitle("Cumulative trial registrations by NCA", y=1.02, fontsize=23)
+fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=400)
+#fig.suptitle("Cumulative trial registrations by NCA", y=1.02, fontsize=23)
 fig.tight_layout()
 
 pd.set_option('mode.chained_assignment', None)
@@ -251,13 +251,174 @@ fig.text(.5, -0.02, 'Record Entry Year', ha='center', va='center', fontsize=20)
 plt.legend(['Cumulative Count of New CTA Registrations', 'Stable Trend Line'], 
            loc='upper center', ncol=5, bbox_to_anchor = (-1.2, -.55), fontsize=15)
 plt.show()
-#fig.savefig(parent + '/data/Figures/fig2.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_1.jpg', bbox_inches='tight', dpi=400)
+#fig.savefig(parent + '/data/Figures/fig_1.eps', bbox_inches='tight', dpi=400)
+
+# + trusted=true
+#Reduced Figure
+fig, axes = plt.subplots(figsize = (20, 3), nrows=1, ncols=5, dpi=400)
+#fig.suptitle("Cumulative trial registrations by NCA", y=1.02, fontsize=23)
+fig.tight_layout()
+
+included_countries = ['UK - MHRA', 'France - ANSM', 'Norway - NoMA', 'Romania - ANMDM', 'Italy - AIFA']
+
+pd.set_option('mode.chained_assignment', None)
+for x, y in enumerate(fig.axes):
+    country = grouped.loc[included_countries[x]]
+    first_reporting_quarter = country[country.eudract_number > 0].index.min()
+    adjusted_data = zero_out_dict(country.to_dict()['eudract_number'], quarters) 
+    data = pd.DataFrame({'eudract_number': adjusted_data})
+    x_ticks = data.index
+    
+    #Get rid of leading zeros
+    data['eudract_number'] = np.where(data.index < first_reporting_quarter, np.nan, data.eudract_number)
+    
+    consolidated = data[(data.index.year > 2004) & (data.index.year < 2020) & data.eudract_number.notnull()]
+    
+    leading_zero_check = True
+    i=0
+    
+    while leading_zero_check:
+        if consolidated.eudract_number[i] == 0:
+            consolidated.at[consolidated.index[i], 'eudract_number'] = np.nan
+            i+=1
+        else:
+            leading_zero_check = False
+    
+    consolidated = consolidated[consolidated.eudract_number.notnull()]
+    
+    cumulative = consolidated.cumsum()
+    
+    # Plotting the country trend
+    cumulative.plot(ax=y, lw=4, sharex='col',legend=False)
+    
+    #Plotting the reference line
+    cumulative.loc[[cumulative.index[0], cumulative.index[-1]]].plot(ax=y, legend=False, lw=2, style='--')
+    
+    y.set_title(included_countries[x], pad=6, fontsize=16)
+    y.set_axisbelow(True)
+    y.grid(zorder=0)
+    y.set_xlabel('')
+    y.set_xlim(x_ticks[0], x_ticks[-1])
+    
+pd.set_option('mode.chained_assignment', 'warn')
+
+fig.text(-0.015, 0.5, 'Cumulative Trial Count', ha='center', va='center', rotation='vertical', fontsize=15)
+fig.text(.5, -0.04, 'Record Entry Year', ha='center', va='center', fontsize=20)
+
+plt.legend(['Cumulative Count of Protocol Registrations', 'Stable Trend Line'], 
+           loc='upper center', ncol=5, bbox_to_anchor = (-1.75, -.3), fontsize=15)
+plt.show()
+#fig.savefig(parent + '/data/Figures/fig_1.jpg', bbox_inches='tight', dpi=400)
+#fig.savefig(parent + '/data/Figures/fig_1.eps', bbox_inches='tight', dpi=400)
+
+# + trusted=true
+fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=400)
+fig.suptitle("Trends in trial registrations by NCA by Year", y=1.02, fontsize=23)
+fig.tight_layout()
+
+pd.set_option('mode.chained_assignment', None)
+for x, y in enumerate(fig.axes):
+    country = grouped_2.loc[ordered_countries_new[x]]
+    first_reporting_year = country[country.eudract_number > 0].index.min()
+    adjusted_data = zero_out_dict(country.to_dict()['eudract_number'], years) 
+    data = pd.DataFrame({'eudract_number': adjusted_data})
+    x_ticks = data.index
+    
+    #Get rid of leading zeros
+    data['eudract_number'] = np.where(data.index < first_reporting_year, np.nan, data.eudract_number)
+    
+    consolidated = data[(data.index.year > 2004) & (data.index.year < 2020) & data.eudract_number.notnull()]
+    
+    leading_zero_check = True
+    i=0
+    
+    while leading_zero_check:
+        if consolidated.eudract_number[i] == 0:
+            consolidated.at[consolidated.index[i], 'eudract_number'] = np.nan
+            i+=1
+        else:
+            leading_zero_check = False
+    
+    consolidated = consolidated[consolidated.eudract_number.notnull()]
+    
+    consolidated.plot(ax=y, lw=2, sharex='col',legend=False)
+    
+    #if ordered_countries_original[x] == 'Slovenia - JAZMP':
+    #    y.set_yticks(range(0,16,3))
+    
+    y.set_title(ordered_countries_new[x], pad=6, fontsize=16)
+    y.set_axisbelow(True)
+    y.grid(zorder=0)
+    y.set_xlabel('')
+    y.set_xlim(x_ticks[0], x_ticks[-1])
+    y.set_ylim(ymin=0)
+    
+pd.set_option('mode.chained_assignment', 'warn')
+
+fig.text(-0.015, 0.5, 'Trial Count', ha='center', va='center', rotation='vertical', fontsize=20)
+fig.text(.5, -0.02, 'Record Entry Year', ha='center', va='center', fontsize=20)
+
+plt.show()
+#fig.savefig(parent + '/data/Figures/fig_s2.jpg', bbox_inches='tight', dpi=400)
+
+# + trusted=true
+fig, axes = plt.subplots(figsize = (20, 3), nrows=1, ncols=5, dpi=400)
+#fig.suptitle("Trends in trial registrations by NCA by Year", y=1.02, fontsize=23)
+fig.tight_layout()
+
+included_countries = ['UK - MHRA', 'France - ANSM', 'Norway - NoMA', 'Romania - ANMDM', 'Italy - AIFA']
+
+pd.set_option('mode.chained_assignment', None)
+for x, y in enumerate(fig.axes):
+    country = grouped_2.loc[included_countries[x]]
+    first_reporting_year = country[country.eudract_number > 0].index.min()
+    adjusted_data = zero_out_dict(country.to_dict()['eudract_number'], years) 
+    data = pd.DataFrame({'eudract_number': adjusted_data})
+    x_ticks = data.index
+    
+    #Get rid of leading zeros
+    data['eudract_number'] = np.where(data.index < first_reporting_year, np.nan, data.eudract_number)
+    
+    consolidated = data[(data.index.year > 2004) & (data.index.year < 2020) & data.eudract_number.notnull()]
+    
+    leading_zero_check = True
+    i=0
+    
+    while leading_zero_check:
+        if consolidated.eudract_number[i] == 0:
+            consolidated.at[consolidated.index[i], 'eudract_number'] = np.nan
+            i+=1
+        else:
+            leading_zero_check = False
+    
+    consolidated = consolidated[consolidated.eudract_number.notnull()]
+    
+    consolidated.plot(ax=y, lw=2, sharex='col',legend=False)
+    
+    #if ordered_countries_original[x] == 'Slovenia - JAZMP':
+    #    y.set_yticks(range(0,16,3))
+    
+    y.set_title(included_countries[x], pad=6, fontsize=16)
+    y.set_axisbelow(True)
+    y.grid(zorder=0)
+    y.set_xlabel('')
+    y.set_xlim(x_ticks[0], x_ticks[-1])
+    y.set_ylim(ymin=0)
+    
+pd.set_option('mode.chained_assignment', 'warn')
+
+fig.text(-0.015, 0.5, 'Trial Count', ha='center', va='center', rotation='vertical', fontsize=20)
+fig.text(.5, -0.02, 'Record Entry Year', ha='center', va='center', fontsize=20)
+
+plt.show()
+#fig.savefig(parent + '/data/Figures/fig_s2.jpg', bbox_inches='tight', dpi=400)
 # -
 
 # For comparison here are the raw trends in new registrations by quarter
 
 # + trusted=true
-fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=300)
+fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=400)
 fig.suptitle("Trends in trial registrations by NCA by Quarter", y=1.02, fontsize=23)
 fig.tight_layout()
 
@@ -303,7 +464,7 @@ fig.text(-0.015, 0.5, 'Trial Count', ha='center', va='center', rotation='vertica
 fig.text(.5, -0.02, 'Record Entry Year', ha='center', va='center', fontsize=20)
 
 plt.show()
-#fig.savefig(parent + '/data/Figures/sfig1.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_s2.jpg', bbox_inches='tight', dpi=400)
 # -
 
 # Lasty, we can sense check that these dates make sense by comparing the year the CTA was entered to the date the NCA gave approval. When we graph them on top of each other, we can see that the overall trend align very well though with approvals being slightly less susceptable to large jumps.
@@ -366,7 +527,7 @@ plt.legend(['First Entered Date', 'NCA Approval Date'],
 plt.show()
 
 # + trusted=true
-fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=300)
+fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=400)
 fig.suptitle("Trends in trial registrations by NCA", y=1.02, fontsize=23)
 fig.tight_layout()
 
@@ -426,7 +587,7 @@ pd.set_option('mode.chained_assignment', 'warn')
 plt.legend(['First Entered Date', 'NCA Approval Date'], 
            loc='upper center', ncol=5, bbox_to_anchor = (-1.2, -.5), fontsize=15)
 plt.show()
-#fig.savefig(parent + '/data/Figures/sfig2.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_s3.jpg', bbox_inches='tight', dpi=400)
 # -
 
 # # Cross-checking countries listed in results with public CTAs
@@ -478,9 +639,19 @@ reg_check_no_buffer['unacct_prct'] = round((reg_check_no_buffer['unaccounted'] /
 reg_check_no_buffer.head()
 
 # + trusted=true
-fig, ax = plt.subplots(figsize = (20,10), dpi=300)
+(reg_check_no_buffer.total.sum() - reg_check_no_buffer.unaccounted.sum()) / reg_check_no_buffer.total.sum()
 
-title = 'CTA Availability for Reported Trials By Country'
+# + trusted=true
+reg_check_no_buffer.loc['Romania']
+
+# + trusted=true
+reg_check_no_buffer.loc['France']
+
+# + trusted=true
+reg_check_no_buffer.loc['Poland']
+
+# + trusted=true
+fig, ax = plt.subplots(figsize = (20,10), dpi=400)
 
 sorted_countries = reg_check_no_buffer.sort_values(by='total')
 sorted_countries[['accounted', 'unaccounted']].plot.bar(stacked=True, ax=ax,
@@ -495,16 +666,20 @@ for rect, label, y_off in zip(rects, sorted_countries.acct_prct.values, sorted_c
     ax.text(rect.get_x() + rect.get_width() / 2, y_off + 25, str(label) + '%', 
             ha='center', va='bottom', fontsize=9)
 
+for patch in ax.patches[30:]:
+    patch.set_hatch('/')
+
 ax.legend(['Protocol Available', 'Protocol Unavailable'], 
            loc='upper left', fontsize=15)
     
 
-plt.title(title, pad=10, fontsize=23)
+#plt.title('CTA Availability for Reported Trials By Country', pad=10, fontsize=23)
 
 plt.ylabel('Trial Count', fontsize=15, labelpad=6)
     
 plt.show()
-#fig.savefig(parent + '/data/Figures/fig3.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_2.jpg', bbox_inches='tight', dpi=400)
+#fig.savefig(parent + '/data/Figures/fig_2.eps', bbox_inches='tight', dpi=400)
 
 # + trusted=true
 min_start_date = analysis_df[['eudract_number', 'entered_year']].groupby('eudract_number', as_index=False).min()
@@ -512,7 +687,10 @@ min_start_date = analysis_df[['eudract_number', 'entered_year']].groupby('eudrac
 by_year_df = missing_protocols.merge(min_start_date, how='left', left_on='trial_id', right_on='eudract_number').drop('eudract_number', axis=1)
 
 # + trusted=true
-fig, ax = plt.subplots(figsize=(24,12), dpi = 300)
+prct_missing
+
+# + trusted=true
+fig, ax = plt.subplots(figsize=(24,12), dpi = 400)
 
 to_graph = by_year_df[['entered_year', 'total_missing']].groupby('entered_year').sum()
 to_graph.index = to_graph.index.astype(int)
@@ -551,7 +729,7 @@ ax.patch.set_visible(False)
 ax.legend(fontsize=20)
 
 plt.show()
-#fig.savefig(parent + '/data/Figures/fig4.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_s4.jpg', bbox_inches='tight', dpi=400)
 # -
 
 # As a quick sense check, we can use longer lags between the first available protocol for a country to see if it makes a difference. This can be adjusted using the offseet parameter of the compare_enrollment_registration function. However, Figure 4 above makes the point that missing CTAs are not all clustered around the years in which countries first connected with the EMA system as well.
@@ -652,7 +830,7 @@ grouped_total = regrouped.droplevel(level=0).groupby(regrouped.droplevel(level=0
 title='Trial Status of CTAs by Record Entry Date'
 
 
-fig, ax = plt.subplots(figsize = (10,5))
+fig, ax = plt.subplots(figsize = (10,5), dpi=400)
 grouped_total.reindex(['completed', 'ongoing', 'missing', 'other']).T.plot.bar(stacked=True, width=.9, ax=ax, 
                                                                                rot=45, title = title, legend=False)
 
@@ -664,7 +842,23 @@ ax.set_ylabel('CTA Count')
 plt.legend(['Completed', 'Ongoing', 'Other', 'Missing'], 
            loc='upper center', ncol=5, bbox_to_anchor = (0.5, -0.2), fontsize=12)
 plt.show()
-#fig.savefig(parent + '/data/Figures/sfig3.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_s5.jpg', bbox_inches='tight', dpi=400)
+
+# +
+#A quick look at the trend on ongoing trials over time
+
+# + trusted=true
+g_total = grouped_total.T
+
+g_total['prct'] = g_total['completed'] / (g_total['ongoing'] + g_total['completed'] + g_total['missing'] + g_total['other'])
+
+g_total
+
+# + trusted=true
+grouped_total.sum(axis=1)
+
+# + trusted=true
+63434/97227
 
 # + trusted=true
 overall_prct_dict = {}
@@ -681,8 +875,8 @@ rankings_completed
 # + trusted=true
 #And now a look at the trend for each NCA
 
-fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=300)
-fig.suptitle("Trial Status of Protocols by NCA", y=1.02, fontsize=23)
+fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=400)
+#fig.suptitle("Trial Status of Protocols by NCA", y=1.02, fontsize=23)
 fig.tight_layout()
 for x, y in enumerate(fig.axes):
     regrouped.loc[[rankings_completed.index[x]]].droplevel(level=0).T.plot.bar(stacked=True, ax=y, width=.85, 
@@ -692,6 +886,17 @@ for x, y in enumerate(fig.axes):
     y.set_axisbelow(True)
     y.grid(axis='y', zorder=0)
     y.set_xlabel('')
+    
+    hatches = ['','//', 'oo', '\\\\']
+    counter = 0
+    h_counter = 0
+    patch_count = len(y.patches)
+    for p in y.patches:
+        p.set_hatch(hatches[h_counter])
+        counter += 1
+        if counter == ((patch_count/4) * (h_counter+1)):
+            h_counter += 1
+            
 
 fig.text(-0.015, 0.5, 'Trial Count', ha='center', va='center', rotation='vertical', fontsize=20)
 fig.text(.5, -0.025, 'Record Entry Year', ha='center', va='center', fontsize=20)
@@ -700,7 +905,146 @@ plt.legend(['Completed', 'Ongoing', 'Other', 'Missing'],
            loc='upper center', ncol=5, bbox_to_anchor = (-1.2, -.55), fontsize=15)
 
 plt.show()
-#fig.savefig(parent + '/data/Figures/fig5.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_3.jpg', bbox_inches='tight', dpi=400)
+#fig.savefig(parent + '/data/Figures/fig_3.eps', bbox_inches='tight', dpi=400)
+
+# + trusted=true
+#Pull out the highlighted countries
+
+fig, axes = plt.subplots(figsize = (20, 3), nrows=1, ncols=4, dpi=400)
+#fig.suptitle("Trial Status of Protocols by NCA", y=1.02, fontsize=23)
+fig.tight_layout()
+included_countries = ['Lithuania - VVKT', 'Belgium - FAMHP', 'Netherlands - CCMO', 'Spain - AEMPS']
+
+for x, y in enumerate(fig.axes):
+    regrouped.loc[[included_countries[x]]].droplevel(level=0).T.plot.bar(stacked=True, ax=y, width=.85, 
+                                                                               legend=False, sharex='col', rot=45)
+    
+    y.set_title(included_countries[x], pad=6, fontsize=16)
+    y.set_axisbelow(True)
+    y.grid(axis='y', zorder=0)
+    y.set_xlabel('')
+    
+    hatches = ['','//', 'oo', '\\\\']
+    counter = 0
+    h_counter = 0
+    patch_count = len(y.patches)
+    for p in y.patches:
+        p.set_hatch(hatches[h_counter])
+        counter += 1
+        if counter == ((patch_count/4) * (h_counter+1)):
+            h_counter += 1
+            
+
+fig.text(0, 0.5, 'Trial Count', ha='center', va='center', rotation='vertical', fontsize=20)
+fig.text(.5, -0.13, 'Record Entry Year', ha='center', va='center', fontsize=20)
+
+plt.legend(['Completed', 'Ongoing', 'Other', 'Missing'], 
+           loc='upper center', ncol=5, bbox_to_anchor = (-1.2, -.38), fontsize=15)
+
+
+plt.show()
+#fig.savefig(parent + '/data/Figures/fig_3.jpg', bbox_inches='tight', dpi=400)
+#fig.savefig(parent + '/data/Figures/fig_3.eps', bbox_inches='tight', dpi=400)
+# -
+
+# # Conflicting Completion Status
+#
+# Potentially look at the number of multi-protocol trials that have conflicting trial status.
+
+# + trusted=true
+status_by_trial = analysis_df[['eudract_number', 'nca', 'entered_year', 'trial_status']].reset_index(drop=True)
+status_by_trial['trial_status'] = status_by_trial.trial_status.fillna('Missing')
+
+# + trusted=true
+status_by_trial.head()
+
+# + trusted=true
+status_by_trial['trial_status'].value_counts()
+
+
+# + trusted=true
+status_summary = status_by_trial[['eudract_number', 'trial_status']].groupby('eudract_number')['trial_status'].count().to_frame(name='count').join(status_by_trial[['eudract_number', 'trial_status']].groupby('eudract_number')['trial_status'].apply(list).to_frame(name='status'))
+
+# + trusted=true
+status_summary['set'] = status_summary['status'].apply(set)
+
+# + trusted=true
+multi_status = status_summary[status_summary['count'] > 1].reset_index().set_index('eudract_number')
+
+# + trusted=true
+indiv_status = multi_status['set'].to_list()
+
+# + trusted=true
+#This counts the number of trials that have an ongoing and a completed status
+
+c = 0
+indicator_var = []
+
+for i in indiv_status:
+    if ('Ongoing' in i or 'Restarted' in i) and ('Completed' in i or 'Premautrely Ended' in i):
+        c+=1
+        indicator_var.append(1)
+    else:
+        indicator_var.append(0)
+        
+print(c)
+
+# + trusted=true
+c/len(indiv_status)
+
+# + trusted=true
+group_year = status_by_trial[['eudract_number', 'entered_year']].groupby('eudract_number').max()
+
+# + tags=[] trusted=true
+multi_status['conflict'] = indicator_var
+
+year_joined = multi_status.join(group_year, how='left')
+
+year_joined.head()
+
+# + trusted=true
+conflict_summary = year_joined[['conflict', 'entered_year']].reset_index(drop=True).groupby('entered_year').agg(['sum', 'count'])
+
+# + trusted=true
+conflict_summary.head()
+
+# + trusted=true
+conflict_summary['prct'] = conflict_summary['conflict']['sum'] / conflict_summary['conflict']['count']
+
+# + trusted=true
+conflict_summary
+
+# + trusted=true
+fig, ax = plt.subplots(figsize = (10,5), dpi=400)
+
+plt.plot(conflict_summary.index, conflict_summary['prct'])
+
+plt.show()
+
+# + trusted=true
+single_status = status_summary[status_summary['count'] == 1].reset_index().set_index('eudract_number').join(status_by_trial.set_index('eudract_number')[['entered_year']], how='left')
+
+
+# + trusted=true
+def is_ongoing(x):
+    if "Ongoing" in x:
+        return 1
+    else:
+        return 0
+
+
+# + trusted=true
+single_status['ongoing'] = single_status['status'].apply(is_ongoing)
+
+# + trusted=true
+single_s_grouped
+
+# + trusted=true
+single_s_grouped[single_s_grouped['ongoing']['sum'].index < 2015].sum()
+
+# + trusted=true
+6068/16552
 # -
 
 # # Missing Completion Dates
@@ -734,7 +1078,7 @@ overall_dates = stacked_dates.droplevel(level=0).groupby(stacked_dates.droplevel
 
 title='Availability of Completion Dates for Completed CTAs'
 
-fig, ax = plt.subplots(figsize = (10,5))
+fig, ax = plt.subplots(figsize = (10,5), dpi=400)
 overall_dates.reindex(['numerator', 'missing_dates']).T.plot.bar(stacked=True, width=.9, ax=ax, legend=False, 
                                                                  rot=45, title=title)
 
@@ -746,7 +1090,22 @@ ax.set_ylabel('CTA Count')
 plt.legend(['Has Date', 'Missing Date'], 
            loc='upper right', fontsize=12)
 plt.show()
-#fig.savefig(parent + '/data/Figures/sfig4.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_s6.jpg', bbox_inches='tight', dpi=400)
+
+# + trusted=true
+dates_trans = overall_dates.T
+
+# + trusted=true
+dates_trans['prct'] = dates_trans['numerator'] / (dates_trans['numerator'] + dates_trans['missing_dates'])
+
+# + trusted=true
+dates_trans.missing_dates.sum() + dates_trans.numerator.sum()
+
+# + trusted=true
+dates_trans.numerator.sum() / (dates_trans.missing_dates.sum() + dates_trans.numerator.sum())
+
+# + trusted=true
+dates_trans
 
 # + trusted=true
 overall_comp_dict = {}
@@ -761,8 +1120,8 @@ rankings_compdate = pd.Series(overall_comp_dict).sort_values(ascending=False)
 rankings_compdate
 
 # + trusted=true
-fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4)
-fig.suptitle("Available Completion Dates for Completed CTAs by NCA", y=1.02, fontsize=23)
+fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=400)
+#fig.suptitle("Available Completion Dates for Completed CTAs by NCA", y=1.02, fontsize=23)
 fig.tight_layout()
 
 for x, y in enumerate(fig.axes):
@@ -774,6 +1133,16 @@ for x, y in enumerate(fig.axes):
     y.grid(axis='y', zorder=0)
     y.set_xlabel('')
     
+    hatches = ['','//']
+    counter = 0
+    h_counter = 0
+    patch_count = len(y.patches)
+    for p in y.patches:
+        p.set_hatch(hatches[h_counter])
+        counter += 1
+        if counter == ((patch_count/2) * (h_counter+1)):
+            h_counter += 1
+    
 fig.text(-0.015, 0.5, 'Trial Count', ha='center', va='center', rotation='vertical', fontsize=20)
 fig.text(.5, -0.02, 'Record Entry Year', ha='center', va='center', fontsize=20)
     
@@ -781,7 +1150,78 @@ plt.legend(['Has Date', 'Missing Date'],
            loc='lower center', ncol=5, bbox_to_anchor = (-1.25, -.9), fontsize=15)
 
 plt.show()
-#fig.savefig(parent + '/data/Figures/fig6.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_4.jpg', bbox_inches='tight', dpi=400)
+#fig.savefig(parent + '/data/Figures/fig_4.eps', bbox_inches='tight', dpi=400)
+# -
+
+# # Combining Status and Completion Date into single graph
+
+# + trusted=true
+date_df2 = analysis_df[['eudract_number', 'nca', 'entered_year', 'trial_status', 'completion_date', 'trial_results']].reset_index(drop=True)
+date_df2['trial_status'] = date_df2.trial_status.fillna('Missing')
+date_df2['has_completion_date'] = np.where(date_df2.completion_date.isna(), 0, 1)
+
+# + trusted=true
+total_trials = date_df2[['nca', 
+                         'entered_year', 
+                         'has_completion_date']].groupby(['nca', 
+                                                          'entered_year']).count().rename({'has_completion_date': 'denominator'}, axis=1)
+
+total_trials_date = only_completed[['nca', 'entered_year', 'has_completion_date']].groupby(['nca', 'entered_year']).sum().rename({'has_completion_date': 'numerator'}, axis=1)
+
+# + trusted=true
+merged_dates2 = total_trials.join(total_trials_date)
+merged_dates2['missing_dates'] = merged_dates2.denominator - merged_dates2.numerator
+
+# + trusted=true
+stacked_dates2 = merged_dates2.drop('denominator', axis=1).stack().unstack(1)
+
+# + trusted=true
+stacked_dates2
+
+# + trusted=true
+total_comp_dict = {}
+
+for x in ordered_countries:
+    d = stacked_dates2.loc[x].T
+    num = d.numerator.sum()
+    denom = num + d.missing_dates.sum()
+    total_comp_dict[x] = num / denom
+
+rankings_compdate2 = pd.Series(total_comp_dict).sort_values(ascending=False)
+rankings_compdate2
+
+# + trusted=true
+props_for_graph = rankings_completed.to_frame(name='prct_completed').join(rankings_compdate2.to_frame(name='prct_date'))
+
+# + trusted=true
+props_for_graph['diff1'] = props_for_graph.prct_completed - props_for_graph.prct_date
+props_for_graph['diff2'] = 1 - props_for_graph.prct_completed
+
+# + trusted=true
+props_for_graph
+
+# + trusted=true
+fig = plt.figure(figsize = (10,8), dpi=400)
+ax = fig.add_subplot(111)
+
+ax.barh(props_for_graph.index, props_for_graph.prct_date, align='center', height=.5, color='C0', hatch='////', label='Has Completion date')
+ax.barh(props_for_graph.index, props_for_graph.diff1, align='center', height=.5, color='C0', left=props_for_graph.prct_date, label='Completed')
+ax.barh(props_for_graph.index, props_for_graph.diff2, align='center', height=.5, color='C1', left=props_for_graph.prct_completed, label = 'Ongoing and Other')
+ax.set_xlabel('Proportion of Registered Trials')
+ax.tick_params(axis='x', labelsize=9)
+
+handles, labels = plt.gca().get_legend_handles_labels()
+order = [1,0,2]
+ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], ncol=3, loc='lower center', bbox_to_anchor = (.5, -.12))
+
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['left'].set_visible(False)
+
+#plt.title('')
+plt.tight_layout()
+plt.show()
 # -
 
 # # Trend in Results Availability by registration year
@@ -816,9 +1256,33 @@ print(len(trial_reporting[trial_reporting.nca > 1]))
 print(len(trial_reporting))
 
 # + trusted=true
+trial_reporting[trial_reporting.nca == 1].results_dummy.sum()
+
+# + trusted=true
+6259/23623
+
+# + trusted=true
+trial_reporting[trial_reporting.nca > 1].results_dummy.sum()
+
+# + trusted=true
+8423/13897
+
+# + trusted=true
+trial_reporting
+
+# + trusted=true
+trial_reporting.results_dummy.sum()
+
+# + trusted=true
+trial_reporting[trial_reporting.nca == 1].results_dummy.sum()
+
+# + trusted=true
+6259/14682
+
+# + trusted=true
 #Graphing the overall trend for single vs multiple CTA trials
 
-fig, ax = plt.subplots(figsize = (10,5), dpi=300)
+fig, ax = plt.subplots(figsize = (10,5), dpi=400)
 
 plt.plot(range(2004,2021), multi_cta['reporting_prct'], marker='.', markersize=10)
 plt.plot(range(2004,2021), single_cta['reporting_prct'], marker='^', markersize=10)
@@ -836,7 +1300,7 @@ plt.xlabel('Latest Record Entry Year', labelpad=10)
 plt.title('Results Availability by Year', pad=10)
 
 plt.show()
-#fig.savefig(parent + '/data/Figures/fig7.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_s7.jpg', bbox_inches='tight', dpi=400)
 
 # + trusted=true
 eu_protocol_count= reporting_by_country.groupby('eudract_number').count()[['nca']].reset_index()
@@ -871,6 +1335,10 @@ multi_group['prct'] = round((multi_group['sum'] / multi_group['count']) * 100, 2
 # Creating for all CTAs
 
 # + trusted=true
+#Get the sum of any NCA with this
+stacked.loc['Romania - ANMDM'].sum().sum()
+
+# + trusted=true
 single_cta_reporting = {}
 
 for x in ordered_countries:
@@ -885,8 +1353,8 @@ rankings_reporting
 # + trusted=true
 #Single CTAs for all NCAs...could turn this into lines as well potentially
 
-fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4)
-fig.suptitle("Proportion of Single-CTA Trials Reported by Year", y=1.02, fontsize=23)
+fig, axes = plt.subplots(figsize = (20, 16), nrows=7, ncols=4, dpi=400)
+#fig.suptitle("Proportion of Single-CTA Trials Reported by Year", y=1.02, fontsize=23)
 fig.tight_layout()
 for x, y in enumerate(fig.axes):
     stacked.loc[[rankings_reporting.index[x]]].droplevel(level=0).T.plot.bar(stacked=True, ax=y, width=.9, legend=False,
@@ -896,6 +1364,16 @@ for x, y in enumerate(fig.axes):
     y.set_axisbelow(True)
     y.grid(axis='y', zorder=0)
     y.set_xlabel('')
+    
+    hatches = ['','//']
+    counter = 0
+    h_counter = 0
+    patch_count = len(y.patches)
+    for p in y.patches:
+        p.set_hatch(hatches[h_counter])
+        counter += 1
+        if counter == ((patch_count/2) * (h_counter+1)):
+            h_counter += 1
 
 plt.legend(['Reported', 'Unreported'], 
            loc='lower center', ncol=5, bbox_to_anchor = (-1.25, -.9), fontsize=15)
@@ -904,4 +1382,8 @@ fig.text(-0.015, 0.5, 'Trial Count', ha='center', va='center', rotation='vertica
 fig.text(.5, -0.02, 'Record Entry Year', ha='center', va='center', fontsize=20)
 
 plt.show()
-#fig.savefig(parent + '/data/Figures/fig8.jpg', bbox_inches='tight', dpi=300)
+#fig.savefig(parent + '/data/Figures/fig_5.jpg', bbox_inches='tight', dpi=400)
+#fig.savefig(parent + '/data/Figures/fig_5.eps', bbox_inches='tight', dpi=400)
+# -
+
+

@@ -110,6 +110,71 @@ nca_name_mapping = {'UK - MHRA': 'UK - MHRA',
                     'Iceland - IMCA': 'Iceland - IMA'}
 
 
+ordered_countries_original = ['UK - MHRA',
+                              'Spain - AEMPS',
+                              'Germany - BfArM',
+                              'Italy - Italian Medicines Agency',
+                              'France - ANSM',
+                              'Belgium - FPS Health-DGM',
+                              'Netherlands - Competent Authority',
+                              'Hungary - National Institute of Pharmacy',
+                              'Czech Republic - SUKL',
+                              'Austria - BASG',
+                              'Denmark - DHMA',
+                              'Sweden - MPA',
+                              'Poland - Office for Medicinal Products',
+                              'Germany - PEI',
+                              'Finland - Fimea',
+                              'Bulgarian Drug Agency',
+                              'Slovakia - SIDC (Slovak)',
+                              'Greece - EOF',
+                              'Portugal - INFARMED',
+                              'Lithuania - SMCA',
+                              'Ireland - HPRA',
+                              'Latvia - SAM',
+                              'Estonia - SAM',
+                              'Norway - NOMA',
+                              'Croatia - MIZ',
+                              'Slovenia - JAZMP',
+                              'Romania - National Agency for Medicines and Medical Devices',
+                              'Iceland - IMCA',
+                              'Malta - ADM',
+                              'Luxembourg - Ministry of Health',
+                              'Cyprus - MoH-Ph.S']
+
+ordered_countries_new = ['UK - MHRA',
+                         'Spain - AEMPS',
+                         'Germany - BfArM',
+                         'Italy - AIFA',
+                         'France - ANSM',
+                         'Belgium - FAMHP',
+                         'Netherlands - CCMO',
+                         'Hungary - OGYEI',
+                         'Czech Republic - SUKL',
+                         'Austria - BASG',
+                         'Denmark - DKMA',
+                         'Sweden - MPA',
+                         'Poland - URPL',
+                         'Germany - PEI',
+                         'Finland - FIMEA',
+                         'Bulgaria - BDA',
+                         'Greece - EOF',
+                         'Slovakia - SUKL',
+                         'Portugal - INFARMED',
+                         'Lithuania - VVKT',
+                         'Ireland - HPRA',
+                         'Latvia - ZVA',
+                         'Estonia - SAM',
+                         'Norway - NoMA',
+                         'Croatia - MIZ',
+                         'Slovenia - JAZMP',
+                         'Romania - ANMDM',
+                         'Iceland - IMA',
+                         'Malta - ADM',
+                         'Luxembourg - Ministry of Health',
+                         'Cyprus - MoH-Ph.S']
+
+
 #Functions
 
 def earliest_record_check(data, nca_name):
@@ -211,3 +276,9 @@ def compare_enrollment_registration(zipped_cats, offset=0):
         results_list.append(trial_dict)
 
     return results_list
+
+def is_ongoing(x):
+    if "Ongoing" in x:
+        return 1
+    else:
+        return 0
