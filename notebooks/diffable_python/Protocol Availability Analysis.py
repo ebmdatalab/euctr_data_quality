@@ -7,11 +7,12 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.2
+#       jupytext_version: 1.13.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
+#   orig_nbformat: 4
 # ---
 
 # + trusted=true
@@ -57,8 +58,11 @@ missing_protocols['total_missing'] = missing_protocols.unaccounted.apply(len)
 # + trusted=true
 acct = missing_protocols.accounted.to_list()
 unacct = missing_protocols.unaccounted.to_list()
+ids = missing_protocols.trial_id.to_list()
 
 # + trusted=true
+#Counting missing protocols
+
 accounted_count = {}
 unaccounted_count = {}
 for ac, un in zip(acct, unacct):
@@ -68,6 +72,18 @@ for ac, un in zip(acct, unacct):
     if un:
         for u in un:
             unaccounted_count[u] = unaccounted_count.get(u, 0) + 1
+
+# + trusted=true
+#Lets see how many participants are covered by missing protocols
+
+unacct_enrollment = 0
+
+for u, rc in zip(unacct, results_countries):
+    rc_dict = ast.literal_eval(rc)
+    for uc in u:
+        unacct_enrollment += rc_dict[uc]
+
+print(f'There are {unacct_enrollment} participants covered by missing protocols')
 
 # + trusted=true
 accounted_series = pd.Series(accounted_count)
@@ -239,6 +255,5 @@ reg_check_buffer.head()
 # -
 
 
-# +
 
 
