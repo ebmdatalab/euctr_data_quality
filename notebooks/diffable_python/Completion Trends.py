@@ -7,11 +7,12 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.2
+#       jupytext_version: 1.13.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
+#   orig_nbformat: 4
 # ---
 
 # + trusted=true
@@ -279,8 +280,8 @@ fig, ax = plt.subplots(figsize = (10,5), dpi=400)
 plt.plot(conflict_summary.index, conflict_summary['prct'], marker='.', markersize=10)
 plt.grid()
 plt.xlabel('Record Entry Year', labelpad=10)
-plt.ylabel('Percent Completed')
-plt.title('Percent of all Protocols Registered by Year in a Completed Status', pad=10)
+plt.ylabel('Percent Conflicted')
+plt.title('Trend in Conflicting Completion Information in Multi-Protocol Trials', pad=10)
 
 ax.set_yticks(range(0, 101,10))
 ax.set_xticks(range(2004,2021))
@@ -531,6 +532,6 @@ consistant_dates = has_dates.completion_date['nunique'] == 1
 
 # + trusted=true
 print(f'{round((len(has_dates[all_have_dates & consistant_dates])/len(has_dates)) * 100,2)}% of all trials with multiple protocols and at least one completion date are consistent across all protocols')
-# +
+# -
 
 
