@@ -1,10 +1,11 @@
 #Please note, this is only tested to work on a Mac. May need adjustment to work on Windows 
 #(i.e. removal or adjustment of of multiprocessing)
 
+#Set your working directory locally
 import os
-os.getcwd()
-os.chdir('/Users/nicholasdevito/Desktop/euctr_res_scrape')
-os.getcwd()
+#os.getcwd()
+#os.chdir('')
+#os.getcwd()
 
 from requests import get, ConnectionError
 from bs4 import BeautifulSoup
