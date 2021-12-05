@@ -7,11 +7,12 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.2
+#       jupytext_version: 1.13.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
+#   orig_nbformat: 4
 # ---
 
 # + trusted=true
@@ -72,7 +73,7 @@ print(trial_reporting[trial_reporting.nca == 1].results_dummy.sum())
 print(6259/23623)
 
 # + trusted=true
-trial_reporting[trial_reporting.nca > 1].results_dummy.sum()
+print(trial_reporting[trial_reporting.nca > 1].results_dummy.sum())
 print(8423/13897)
 
 # + trusted=true
@@ -196,6 +197,8 @@ plt.show()
 #fig.savefig(parent + '/data/Figures/fig_5.jpg', bbox_inches='tight', dpi=400)
 #fig.savefig(parent + '/data/Figures/fig_5.eps', bbox_inches='tight', dpi=400)
 #Saved
-# +
+# -
+
+
 
 

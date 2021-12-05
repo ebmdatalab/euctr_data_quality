@@ -114,6 +114,7 @@ france = reg_check_no_buffer.loc['France']['unaccounted']
 top_share = round(((france+poland+romania) / reg_check_no_buffer.unaccounted.sum()) * 100, 2)
 
 print(f'France, Poland, and Romania account for {top_share}% of all missing protocols')
+print(f'This is {france+poland+romania} trials.')
 # -
 
 # # Paper Figure 1
@@ -255,5 +256,6 @@ reg_check_buffer.head()
 # -
 
 
+# +
 
 
