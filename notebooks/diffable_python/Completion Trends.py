@@ -407,7 +407,7 @@ plt.legend(['Has Date', 'Missing Date'],
            loc='lower center', ncol=5, bbox_to_anchor = (-1.25, -.9), fontsize=15)
 
 plt.show()
-#fig.savefig(parent + '/data/Figures/fig_s10.jpg', bbox_inches='tight', dpi=400)
+fig.savefig(parent + '/data/Figures/fig_s10.jpg', bbox_inches='tight', dpi=400)
 #Saved
 # -
 
@@ -532,6 +532,6 @@ consistant_dates = has_dates.completion_date['nunique'] == 1
 
 # + trusted=true
 print(f'{round((len(has_dates[all_have_dates & consistant_dates])/len(has_dates)) * 100,2)}% of all trials with multiple protocols and at least one completion date are consistent across all protocols')
-# -
+# +
 
 
