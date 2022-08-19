@@ -36,7 +36,7 @@ sys.path.append(parent)
 
 # + trusted=true
 usecols=['eudract_number', 'nca', 'entered_year', 'trial_status']
-status_df = pd.read_csv(parent + '/data/analysis_df.csv', usecols = usecols)
+status_df = pd.read_csv(parent + '/data/analysis_df_jul22.csv', usecols = usecols)
 status_df['trial_status'] = status_df.trial_status.fillna('Missing')
 
 status_group = status_df.groupby(['nca', 'entered_year', 'trial_status'], as_index=False).count()
@@ -48,6 +48,9 @@ ordered_countries = list(status_group[['nca', 'eudract_number']].groupby('nca').
 ordered_countries.remove('Malta - ADM')
 ordered_countries.remove('Luxembourg - Ministry of Health')
 ordered_countries.remove('Cyprus - MoH-Ph.S')
+
+# + trusted=true
+ordered_countries
 
 # + trusted=true
 #Collapsing the various trial status categories on the EUCTR into simpler categories
@@ -284,7 +287,7 @@ plt.ylabel('Percent Conflicted')
 plt.title('Trend in Conflicting Completion Information in Multi-Protocol Trials', pad=10)
 
 ax.set_yticks(range(0, 101,10))
-ax.set_xticks(range(2004,2021))
+ax.set_xticks(range(2004,2023))
 
 plt.show()
 #fig.savefig(parent + '/data/Figures/fig_s8.jpg', bbox_inches='tight', dpi=400)
@@ -311,7 +314,7 @@ print(round((6086/16552)*100,2))
 
 # + trusted=true
 usecols=['eudract_number', 'nca', 'entered_year', 'trial_status', 'completion_date', 'trial_results']
-date_df = pd.read_csv(parent + '/data/analysis_df.csv', usecols = usecols)
+date_df = pd.read_csv(parent + '/data/analysis_df_jul22.csv', usecols = usecols)
 date_df['trial_status'] = date_df.trial_status.fillna('Missing')
 date_df['has_completion_date'] = np.where(date_df.completion_date.isna(), 0, 1)
 only_completed = date_df[date_df.trial_status.isin(['Completed', 'Prematurely Ended'])].reset_index(drop=True)
@@ -329,8 +332,8 @@ merged_dates = total_completed.join(total_completed_date)
 merged_dates['missing_dates'] = merged_dates.denominator - merged_dates.numerator
 
 stacked_dates = merged_dates.drop('denominator', axis=1).stack().unstack(1)
-# -
 
+# + [markdown] tags=[]
 # # Supplemental Figure 9
 
 # + trusted=true
@@ -458,7 +461,7 @@ usecols2 = ['eudract_number', 'nca', 'entered_year', 'trial_status', 'completion
 # + trusted=true
 usecols2 = ['eudract_number', 'nca', 'entered_year', 'trial_status', 'completion_date', 'trial_results']
 
-date_df2 = pd.read_csv(parent + '/data/analysis_df.csv', usecols=usecols2)
+date_df2 = pd.read_csv(parent + '/data/analysis_df_jul22.csv', usecols=usecols2)
 date_df2['trial_status'] = date_df2.trial_status.fillna('Missing')
 date_df2['has_completion_date'] = np.where(date_df2.completion_date.isna(), 0, 1)
 
@@ -532,6 +535,8 @@ consistant_dates = has_dates.completion_date['nunique'] == 1
 
 # + trusted=true
 print(f'{round((len(has_dates[all_have_dates & consistant_dates])/len(has_dates)) * 100,2)}% of all trials with multiple protocols and at least one completion date are consistent across all protocols')
-# +
+# -
+
+
 
 

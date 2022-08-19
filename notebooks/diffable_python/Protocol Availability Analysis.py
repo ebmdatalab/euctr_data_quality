@@ -38,7 +38,7 @@ sys.path.append(parent)
 
 # + trusted=true
 #This is the data scraped from the results section that informs this analysis
-results_info = pd.read_csv(parent + '/data/euctr_data_quality_results_scrape_dec_2020.csv')
+results_info = pd.read_csv(parent + '/data/euctr_data_quality_results_scrape_jul_2022.csv')
 results_info['trial_start_date'] = pd.to_datetime(results_info.trial_start_date)
 results_info_filt = results_info[results_info.recruitment_countries.notnull()].reset_index(drop=True)
 
@@ -157,10 +157,10 @@ plt.show()
 # This shows the distribution of missing protocols by record entry year but in absolute amount and as a % of all protocols available from that year.
 
 # + trusted=true
-analysis_df = pd.read_csv(parent + '/data/analysis_df.csv', usecols = ['eudract_number', 'entered_year'])
+analysis_df = pd.read_csv(parent + '/data/analysis_df_jul22.csv', usecols = ['eudract_number', 'entered_year'])
 min_start_date = analysis_df.groupby('eudract_number', as_index=False).min()
 by_year_df = missing_protocols.merge(min_start_date, how='left', left_on='trial_id', right_on='eudract_number').drop('eudract_number', axis=1)
-grouped_overall = pd.read_csv(parent + '/data/grouped_overall.csv')
+grouped_overall = pd.read_csv(parent + '/data/grouped_overall_jul22.csv')
 
 # + trusted=true
 to_graph = by_year_df[['entered_year', 'total_missing']].groupby('entered_year').sum()
@@ -172,7 +172,7 @@ prct_missing['missing_cta_prct'] = (prct_missing.total_missing / prct_missing.eu
 # + trusted=true
 fig, ax = plt.subplots(figsize=(24,12), dpi = 400)
 
-labels = [str(x) for x in range(2004,2021)]
+labels = [str(x) for x in range(2004,2023)]
 
 #I have no idea why but I can only get this graph to work with plt.errorbar
 #l1 = plt.errorbar(prct_missing.index,prct_missing.missing_cta_prct, lw=5, color='orange', label='% Missing')
@@ -184,7 +184,7 @@ plt.tick_params(axis='both', which='major', labelsize=15)
 plt.xticks(rotation=25)
 plt.title("Missing Protocols by Trial Entry Year", pad = 25, fontsize = 25)
 
-ax.set_ylim([0,10])
+ax.set_ylim([0,12])
 ax.set_ylabel('# Missing', fontsize=25, labelpad=50)
 ax.set_xlabel('Record Entry Year', fontsize=25, labelpad=10)
 
@@ -256,6 +256,5 @@ reg_check_buffer.head()
 # -
 
 
-# +
 
 

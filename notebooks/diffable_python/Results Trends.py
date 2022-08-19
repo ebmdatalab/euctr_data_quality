@@ -42,7 +42,7 @@ ordered_countries_new.remove('Cyprus - MoH-Ph.S')
 
 # + trusted=true
 usecols = ['eudract_number', 'nca', 'entered_year', 'trial_results']
-reporting_by_country = pd.read_csv(parent + '/data/analysis_df.csv', usecols = usecols)
+reporting_by_country = pd.read_csv(parent + '/data/analysis_df_jul22.csv', usecols = usecols)
 reporting_by_country['results_dummy'] = np.where(reporting_by_country.trial_results == 'View results', 1, 0)
 
 # + trusted=true
@@ -54,6 +54,9 @@ trial_reporting['results_dummy'] = np.where(trial_reporting.results_dummy > 0, 1
 # + trusted=true
 single_cta = trial_reporting[trial_reporting.nca == 1][['entered_year', 'results_dummy']].groupby('entered_year').agg(['sum', 'count'])
 single_cta['reporting_prct'] = round((single_cta.results_dummy['sum'] / single_cta.results_dummy['count']) * 100, 2)
+
+# + trusted=true
+single_cta
 
 # + trusted=true
 multi_cta = trial_reporting[trial_reporting.nca > 1][['entered_year', 'results_dummy']].groupby('entered_year').agg(['sum', 'count'])
@@ -91,11 +94,11 @@ print(6259/14682)
 
 fig, ax = plt.subplots(figsize = (10,5), dpi=400)
 
-plt.plot(range(2004,2021), multi_cta['reporting_prct'], marker='.', markersize=10)
-plt.plot(range(2004,2021), single_cta['reporting_prct'], marker='^', markersize=10)
-plt.plot(range(2004,2021), all_trial_reporting['reporting_prct'], marker='s', markersize=10, lw=4, alpha=.3)
+plt.plot(range(2004,2023), multi_cta['reporting_prct'], marker='.', markersize=10)
+plt.plot(range(2004,2023), single_cta['reporting_prct'], marker='^', markersize=10)
+plt.plot(range(2004,2023), all_trial_reporting['reporting_prct'], marker='s', markersize=10, lw=4, alpha=.3)
 
-ax.set_xticks(range(2004,2021))
+ax.set_xticks(range(2004,2023))
 
 ax.legend(['Multi-Protocol Trials', 'Single-Protocol Trials', 'All Trials'], loc='upper right', fontsize=10)
 ax.set_axisbelow(True)
@@ -200,5 +203,6 @@ plt.show()
 # -
 
 
+# +
 
 

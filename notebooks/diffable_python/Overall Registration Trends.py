@@ -7,11 +7,12 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.2
+#       jupytext_version: 1.13.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
+#   orig_nbformat: 4
 # ---
 
 # + trusted=true
@@ -36,7 +37,7 @@ sys.path.append(parent)
 # + trusted=true
 usecols = ['eudract_number', 'nca', 'date_entered', 'entered_year', 'approved_date', 'approved_year']
 
-reg_df = pd.read_csv(parent + '/data/analysis_df.csv', usecols = usecols)
+reg_df = pd.read_csv(parent + '/data/analysis_df_jul22.csv', usecols = usecols)
 reg_df['approved_date'] = pd.to_datetime(reg_df['approved_date'])
 reg_df['date_entered'] = pd.to_datetime(reg_df['date_entered'])
 reg_df.head()
@@ -54,7 +55,7 @@ grouped_overall.head()
 
 # + trusted=true
 #On the first run, I need to save the grouped_overall data to make it available to other notebooks
-#grouped_overall.to_csv(parent + '/data/grouped_overall.csv')
+#grouped_overall.to_csv(parent + '/data/grouped_overall_jul22.csv')
 # -
 
 # # Supplemental Figue 1 - Overall registration trend
@@ -62,13 +63,13 @@ grouped_overall.head()
 # + trusted=true
 fig, ax = plt.subplots(figsize = (12,6), dpi=400)
 
-grouped_overall[(grouped_overall.index > 2004) & (grouped_overall.index < 2020)].plot(ax=ax, legend=False, lw=2, 
+grouped_overall[(grouped_overall.index > 2004) & (grouped_overall.index < 2022)].plot(ax=ax, legend=False, lw=2, 
                                                                                       marker='.', markersize=12)
-unique_trials[(unique_trials.index > 2004) & (unique_trials.index < 2020)].plot(ax=ax, legend=False, grid=True, 
+unique_trials[(unique_trials.index > 2004) & (unique_trials.index < 2022)].plot(ax=ax, legend=False, grid=True, 
                                                                                 lw=2, marker='^', markersize=10)
 
 ax.legend(['Country Protocols', 'Unique Trials'], bbox_to_anchor = (1, 1))
-ax.set_xticks(range(2005, 2020))
+ax.set_xticks(range(2005, 2022))
 ax.set_yticks(range(0,7500, 500))
 plt.xlabel('Protocol Entry Year', labelpad=10)
 plt.ylabel('Records Entered')
@@ -126,7 +127,7 @@ for x, y in enumerate(fig.axes):
     #Get rid of leading zeros
     data['eudract_number'] = np.where(data.index < first_reporting_quarter, np.nan, data.eudract_number)
     
-    consolidated = data[(data.index.year > 2004) & (data.index.year < 2020) & data.eudract_number.notnull()]
+    consolidated = data[(data.index.year > 2004) & (data.index.year < 2022) & data.eudract_number.notnull()]
     
     leading_zero_check = True
     i=0
@@ -189,7 +190,7 @@ for x, y in enumerate(fig.axes):
     #Get rid of leading zeros
     data['eudract_number'] = np.where(data.index < first_reporting_quarter, np.nan, data.eudract_number)
     
-    consolidated = data[(data.index.year > 2004) & (data.index.year < 2020) & data.eudract_number.notnull()]
+    consolidated = data[(data.index.year > 2004) & (data.index.year < 2022) & data.eudract_number.notnull()]
     
     leading_zero_check = True
     i=0
@@ -253,7 +254,7 @@ for x, y in enumerate(fig.axes):
     #Get rid of leading zeros
     data['eudract_number'] = np.where(data.index < first_reporting_year, np.nan, data.eudract_number)
     
-    consolidated = data[(data.index.year > 2004) & (data.index.year < 2020) & data.eudract_number.notnull()]
+    consolidated = data[(data.index.year > 2004) & (data.index.year < 2022) & data.eudract_number.notnull()]
     
     leading_zero_check = True
     i=0
@@ -314,7 +315,7 @@ for x, y in enumerate(fig.axes):
     #Get rid of leading zeros
     data['eudract_number'] = np.where(data.index < first_reporting_year, np.nan, data.eudract_number)
     
-    consolidated = data[(data.index.year > 2004) & (data.index.year < 2020) & data.eudract_number.notnull()]
+    consolidated = data[(data.index.year > 2004) & (data.index.year < 2022) & data.eudract_number.notnull()]
     
     leading_zero_check = True
     i=0
@@ -370,8 +371,8 @@ for x, y in enumerate(fig.axes):
     country_2 = grouped_year_2.loc[ordered_countries_new[x]]
     first_reporting_quarter = country[country.eudract_number > 0].index.min()
     
-    adjusted_data = zero_out_dict(country.to_dict()['eudract_number'], range(2004, 2020))
-    adjusted_data_2 = zero_out_dict(country_2.to_dict()['eudract_number'], range(2004, 2020))
+    adjusted_data = zero_out_dict(country.to_dict()['eudract_number'], range(2004, 2022))
+    adjusted_data_2 = zero_out_dict(country_2.to_dict()['eudract_number'], range(2004, 2022))
     
     data = pd.DataFrame({'eudract_number': adjusted_data})
     data_2 = pd.DataFrame({'eudract_number': adjusted_data_2})
@@ -381,8 +382,8 @@ for x, y in enumerate(fig.axes):
     data['eudract_number'] = np.where(data.index < first_reporting_quarter, np.nan, data.eudract_number)
     data_2['eudract_number'] = np.where(data_2.index < first_reporting_quarter, np.nan, data_2.eudract_number)
     
-    consolidated = data[(data.index > 2004) & (data.index < 2020) & data.eudract_number.notnull()]
-    consolidated_2 = data_2[(data_2.index > 2004) & (data_2.index < 2020) & data_2.eudract_number.notnull()]
+    consolidated = data[(data.index > 2004) & (data.index < 2022) & data.eudract_number.notnull()]
+    consolidated_2 = data_2[(data_2.index > 2004) & (data_2.index < 2022) & data_2.eudract_number.notnull()]
     
     leading_zero_check = True
     i=0
@@ -431,5 +432,6 @@ plt.show()
 
 
 
+# +
 
 
