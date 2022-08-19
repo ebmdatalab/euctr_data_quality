@@ -17,6 +17,7 @@
 
 # + trusted=true
 import pandas as pd
+
 from lib.functions_data import nca_name_mapping, earliest_record_check
 
 # + trusted=true
